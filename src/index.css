@@ -1,0 +1,173 @@
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700&family=Nunito:wght@300;400;500;600;700&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Gift List Design System - Warm, Celebratory, Familial */
+
+@layer base {
+  :root {
+    /* Cream/Warm White background */
+    --background: 40 33% 98%;
+    --foreground: 25 30% 15%;
+
+    /* Cards - Soft white */
+    --card: 0 0% 100%;
+    --card-foreground: 25 30% 15%;
+
+    /* Popover */
+    --popover: 0 0% 100%;
+    --popover-foreground: 25 30% 15%;
+
+    /* Primary - Warm Coral/Peach */
+    --primary: 15 85% 65%;
+    --primary-foreground: 0 0% 100%;
+
+    /* Secondary - Sage Green */
+    --secondary: 145 25% 85%;
+    --secondary-foreground: 145 30% 25%;
+
+    /* Muted - Soft Beige */
+    --muted: 35 30% 92%;
+    --muted-foreground: 25 15% 45%;
+
+    /* Accent - Golden/Champagne */
+    --accent: 45 80% 75%;
+    --accent-foreground: 35 50% 20%;
+
+    /* Destructive */
+    --destructive: 0 65% 55%;
+    --destructive-foreground: 0 0% 100%;
+
+    /* Borders & Inputs */
+    --border: 35 20% 88%;
+    --input: 35 20% 88%;
+    --ring: 15 85% 65%;
+
+    --radius: 0.75rem;
+
+    /* Custom colors for progress & states */
+    --success: 145 60% 45%;
+    --success-foreground: 0 0% 100%;
+    --warning: 35 90% 55%;
+    --warning-foreground: 35 50% 15%;
+
+    /* Gradients */
+    --gradient-primary: linear-gradient(135deg, hsl(15 85% 65%) 0%, hsl(25 90% 70%) 100%);
+    --gradient-success: linear-gradient(135deg, hsl(145 60% 45%) 0%, hsl(165 50% 55%) 100%);
+    --gradient-golden: linear-gradient(135deg, hsl(45 80% 75%) 0%, hsl(35 85% 65%) 100%);
+
+    /* Shadows */
+    --shadow-soft: 0 4px 20px -4px hsl(25 30% 15% / 0.08);
+    --shadow-card: 0 8px 30px -8px hsl(25 30% 15% / 0.12);
+    --shadow-glow: 0 0 40px hsl(15 85% 65% / 0.15);
+
+    /* Sidebar */
+    --sidebar-background: 40 33% 98%;
+    --sidebar-foreground: 25 30% 15%;
+    --sidebar-primary: 15 85% 65%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 35 30% 92%;
+    --sidebar-accent-foreground: 25 30% 15%;
+    --sidebar-border: 35 20% 88%;
+    --sidebar-ring: 15 85% 65%;
+  }
+
+  .dark {
+    --background: 25 20% 10%;
+    --foreground: 40 25% 95%;
+
+    --card: 25 18% 14%;
+    --card-foreground: 40 25% 95%;
+
+    --popover: 25 18% 14%;
+    --popover-foreground: 40 25% 95%;
+
+    --primary: 15 85% 60%;
+    --primary-foreground: 0 0% 100%;
+
+    --secondary: 145 20% 20%;
+    --secondary-foreground: 145 25% 85%;
+
+    --muted: 25 15% 20%;
+    --muted-foreground: 35 15% 65%;
+
+    --accent: 45 70% 55%;
+    --accent-foreground: 0 0% 100%;
+
+    --destructive: 0 55% 45%;
+    --destructive-foreground: 0 0% 100%;
+
+    --border: 25 15% 22%;
+    --input: 25 15% 22%;
+    --ring: 15 85% 60%;
+
+    --success: 145 55% 40%;
+    --success-foreground: 0 0% 100%;
+    --warning: 35 80% 50%;
+    --warning-foreground: 0 0% 100%;
+
+    --sidebar-background: 25 20% 10%;
+    --sidebar-foreground: 40 25% 95%;
+    --sidebar-primary: 15 85% 60%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 25 15% 20%;
+    --sidebar-accent-foreground: 40 25% 95%;
+    --sidebar-border: 25 15% 22%;
+    --sidebar-ring: 15 85% 60%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground antialiased;
+    font-family: 'Nunito', sans-serif;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    font-family: 'Playfair Display', serif;
+  }
+}
+
+@layer utilities {
+  .font-display {
+    font-family: 'Playfair Display', serif;
+  }
+
+  .font-body {
+    font-family: 'Nunito', sans-serif;
+  }
+
+  .gradient-primary {
+    background: var(--gradient-primary);
+  }
+
+  .gradient-success {
+    background: var(--gradient-success);
+  }
+
+  .gradient-golden {
+    background: var(--gradient-golden);
+  }
+
+  .shadow-soft {
+    box-shadow: var(--shadow-soft);
+  }
+
+  .shadow-card {
+    box-shadow: var(--shadow-card);
+  }
+
+  .shadow-glow {
+    box-shadow: var(--shadow-glow);
+  }
+
+  .text-balance {
+    text-wrap: balance;
+  }
+}
