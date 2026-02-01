@@ -10,9 +10,9 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
-import { useAddContribution } from '@/hooks/useGifts';
 import { GiftWithContributions } from '@/types/gift';
 import { Heart, CreditCard } from 'lucide-react';
+import { useAddContribution } from '@/hooks/useGifts';
 
 interface ContributeDialogProps {
     gift: GiftWithContributions;
@@ -65,35 +65,38 @@ export function ContributeDialog({ gift, open, onOpenChange }: ContributeDialogP
             return;
         }
 
+        // ✅ PayPal redirect
         setIsProcessing(true);
-
-        // Simulate PayPal payment (in production, integrate real PayPal)
-        await new Promise((resolve) => setTimeout(resolve, 1500));
-
         try {
+            const contributionAmount = parseFloat(amount);
+
+            // 1) ouvrir PayPal.me avec le montant
+            const paypalMe = 'https://paypal.me/listenaissancemenguy';
+            const url = `${paypalMe}/${contributionAmount.toFixed(2)}`;
+
+            window.open(url, '_blank', 'noopener,noreferrer');
+
+            // 2) puis enregistrer la contribution (au choix)
+            // Option A (direct) : on enregistre tout de suite (confiance)
             await addContribution.mutateAsync({
                 gift_id: gift.id,
                 name: name.trim(),
                 amount: contributionAmount,
-                payment_provider: 'PayPal (Demo)',
-                payment_id: `demo-${Date.now()}`,
+                payment_provider: 'PayPal.Me',
+                payment_id: null,
             });
 
             toast({
                 title: 'Merci ! 🎉',
-                description: `Votre contribution de ${contributionAmount.toFixed(2)} € a été enregistrée.`,
+                description: 'Paiement ouvert sur PayPal. Contribution enregistrée.',
             });
 
             setName('');
             setAmount('');
             onOpenChange(false);
-        } catch (error) {
-            console.error('Supabase error:', error);
-            toast({
-                title: 'Erreur',
-                description: error?.message || 'Une erreur est survenue',
-                variant: 'destructive',
-            });
+        } catch (error: unknown) {
+            const message = error instanceof Error ? error.message : 'Une erreur est survenue';
+            toast({ title: 'Erreur', description: message, variant: 'destructive' });
         } finally {
             setIsProcessing(false);
         }
@@ -125,6 +128,7 @@ export function ContributeDialog({ gift, open, onOpenChange }: ContributeDialogP
                             value={name}
                             onChange={(e) => setName(e.target.value)}
                             required
+                            disabled={isProcessing}
                         />
                     </div>
 
@@ -135,11 +139,12 @@ export function ContributeDialog({ gift, open, onOpenChange }: ContributeDialogP
                             type='number'
                             step='0.01'
                             min={minAmount}
-                            max={remainingAmount || undefined}
+                            max={remainingAmount ?? undefined}
                             placeholder={`Min. ${minAmount.toFixed(2)} €`}
                             value={amount}
                             onChange={(e) => setAmount(e.target.value)}
                             required
+                            disabled={isProcessing}
                         />
                         {remainingAmount !== null && (
                             <p className='text-xs text-muted-foreground'>
@@ -148,7 +153,6 @@ export function ContributeDialog({ gift, open, onOpenChange }: ContributeDialogP
                         )}
                     </div>
 
-                    {/* Quick amount buttons */}
                     <div className='flex gap-2 flex-wrap'>
                         {[10, 20, 50, 100].map((quickAmount) => (
                             <Button
@@ -157,7 +161,10 @@ export function ContributeDialog({ gift, open, onOpenChange }: ContributeDialogP
                                 variant='outline'
                                 size='sm'
                                 onClick={() => setAmount(quickAmount.toString())}
-                                disabled={remainingAmount !== null && quickAmount > remainingAmount}
+                                disabled={
+                                    isProcessing ||
+                                    (remainingAmount !== null && quickAmount > remainingAmount)
+                                }
                             >
                                 {quickAmount} €
                             </Button>
@@ -170,7 +177,7 @@ export function ContributeDialog({ gift, open, onOpenChange }: ContributeDialogP
                         disabled={isProcessing}
                     >
                         {isProcessing ? (
-                            'Paiement en cours...'
+                            'Redirection vers PayPal...'
                         ) : (
                             <>
                                 <CreditCard className='w-4 h-4 mr-2' />
@@ -180,7 +187,7 @@ export function ContributeDialog({ gift, open, onOpenChange }: ContributeDialogP
                     </Button>
 
                     <p className='text-xs text-center text-muted-foreground'>
-                        💡 Mode démo : le paiement est simulé
+                        Vous serez redirigé vers PayPal pour finaliser le paiement.
                     </p>
                 </form>
             </DialogContent>
