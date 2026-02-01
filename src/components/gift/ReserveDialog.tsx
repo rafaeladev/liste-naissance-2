@@ -37,6 +37,62 @@ export function ReserveDialog({ gift, open, onOpenChange }: ReserveDialogProps) 
     const reserveGift = useReserveGift();
     const unreserveGift = useUnreserveGift();
     const [paypalAmount, setPaypalAmount] = useState('');
+    const [step, setStep] = useState<'form' | 'confirm'>('form');
+    const [pendingAmount, setPendingAmount] = useState<number | null>(null);
+
+    const handleOpenPaypal = (e: React.FormEvent) => {
+        e.preventDefault();
+
+        if (!name.trim()) {
+            toast({
+                title: 'Erreur',
+                description: 'Veuillez entrer votre nom',
+                variant: 'destructive',
+            });
+            return;
+        }
+
+        const amountNumber = Number(paypalAmount);
+        if (!Number.isFinite(amountNumber) || amountNumber <= 0) {
+            toast({
+                title: 'Erreur',
+                description: 'Veuillez entrer un montant valide',
+                variant: 'destructive',
+            });
+            return;
+        }
+
+        const paypalMe = 'https://www.paypal.me/listenaissancemenguy';
+        const url = `${paypalMe}/${amountNumber.toFixed(2)}`;
+
+        window.open(url, '_blank', 'noopener,noreferrer');
+
+        setPendingAmount(amountNumber);
+        setStep('confirm');
+    };
+
+    const handleConfirmPaid = async () => {
+        try {
+            await reserveGift.mutateAsync({ id: gift.id, reservedBy: name.trim() });
+            toast({ title: 'Cadeau réservé 🎁', description: `Merci ${name} !` });
+            setName('');
+            setPaypalAmount('');
+            setPendingAmount(null);
+            setStep('form');
+            onOpenChange(false);
+        } catch {
+            toast({
+                title: 'Erreur',
+                description: 'Une erreur est survenue',
+                variant: 'destructive',
+            });
+        }
+    };
+
+    const handleCancel = () => {
+        setPendingAmount(null);
+        setStep('form');
+    };
 
     const handleReserveAndPay = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -62,7 +118,7 @@ export function ReserveDialog({ gift, open, onOpenChange }: ReserveDialogProps) 
 
         try {
             // 1) Ouvrir PayPal.me
-            const paypalMe = 'paypal.me/listenaissancemenguy';
+            const paypalMe = 'https://www.paypal.me/listenaissancemenguy';
             const url = `${paypalMe}/${amountNumber.toFixed(2)}`;
             window.open(url, '_blank', 'noopener,noreferrer');
 
@@ -161,51 +217,71 @@ export function ReserveDialog({ gift, open, onOpenChange }: ReserveDialogProps) 
                     </DialogDescription>
                 </DialogHeader>
 
-                <form
-                    onSubmit={handleReserveAndPay}
-                    className='space-y-4'
-                >
-                    <div className='space-y-2'>
-                        <Label htmlFor='reserveName'>Votre nom</Label>
-                        <Input
-                            id='reserveName'
-                            placeholder='Ex: Marie Dupont'
-                            value={name}
-                            onChange={(e) => setName(e.target.value)}
-                            required
-                            disabled={reserveGift.isPending}
-                        />
-                    </div>
-
-                    <div className='space-y-2'>
-                        <Label htmlFor='reserveAmount'>Montant à payer (€)</Label>
-                        <Input
-                            id='reserveAmount'
-                            type='number'
-                            step='0.01'
-                            min='1'
-                            placeholder='Ex: 25'
-                            value={paypalAmount}
-                            onChange={(e) => setPaypalAmount(e.target.value)}
-                            required
-                            disabled={reserveGift.isPending}
-                        />
-                        <p className='text-xs text-muted-foreground'>
-                            Astuce : mets le prix indicatif du cadeau si tu le connais.
-                        </p>
-                    </div>
-
-                    <Button
-                        type='submit'
-                        className='w-full'
-                        disabled={reserveGift.isPending}
+                {step === 'form' ? (
+                    <form
+                        onSubmit={handleOpenPaypal}
+                        className='space-y-4'
                     >
-                        <Gift className='w-4 h-4 mr-2' />
-                        {reserveGift.isPending
-                            ? 'Ouverture PayPal...'
-                            : 'Réserver et payer sur PayPal'}
-                    </Button>
-                </form>
+                        <div className='space-y-2'>
+                            <Label htmlFor='reserveName'>Votre nom</Label>
+                            <Input
+                                id='reserveName'
+                                value={name}
+                                onChange={(e) => setName(e.target.value)}
+                                required
+                            />
+                        </div>
+
+                        <div className='space-y-2'>
+                            <Label htmlFor='reserveAmount'>Montant à payer (€)</Label>
+                            <Input
+                                id='reserveAmount'
+                                type='number'
+                                step='0.01'
+                                min='1'
+                                value={paypalAmount}
+                                onChange={(e) => setPaypalAmount(e.target.value)}
+                                required
+                            />
+                        </div>
+
+                        <Button
+                            type='submit'
+                            className='w-full'
+                        >
+                            Ouvrir PayPal
+                        </Button>
+
+                        <p className='text-xs text-muted-foreground text-center'>
+                            Vous serez redirigé vers PayPal. Revenez ici ensuite.
+                        </p>
+                    </form>
+                ) : (
+                    <div className='space-y-4'>
+                        <p className='text-sm'>
+                            PayPal a été ouvert pour <strong>{pendingAmount?.toFixed(2)} €</strong>.
+                            <br />
+                            Quand vous avez terminé le paiement, cliquez sur{' '}
+                            <strong>J’ai payé</strong>.
+                        </p>
+
+                        <Button
+                            className='w-full'
+                            onClick={handleConfirmPaid}
+                            disabled={reserveGift.isPending}
+                        >
+                            J’ai payé ✅
+                        </Button>
+
+                        <Button
+                            className='w-full'
+                            variant='outline'
+                            onClick={handleCancel}
+                        >
+                            Annuler
+                        </Button>
+                    </div>
+                )}
             </DialogContent>
         </Dialog>
     );
