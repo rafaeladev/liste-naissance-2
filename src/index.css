@@ -15,6 +15,8 @@
         --background: 42 33% 94%;
         --foreground: 184 5% 38%;
 
+        --white: 0 0% 100%;
+
         /* Cards - Soft white */
         --card: 0 0% 100%;
         --card-foreground: 25 30% 15%;
@@ -38,6 +40,8 @@
         /* Accent - Golden/Champagne */
         --accent: 45.2941 79.6875% 74.902%;
         --accent-foreground: 34.6154 50.9804% 20%;
+
+        --accent2: 36 20% 90%;
 
         /* Destructive */
         --destructive: 0 65.0655% 55.098%;

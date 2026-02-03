@@ -10,35 +10,42 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
-import { Checkbox } from '@/components/ui/checkbox';
-import { GiftWithContributions } from '@/types/gift';
-import { Heart, CreditCard } from 'lucide-react';
-import { useAddContribution } from '@/hooks/useGifts';
+import { Heart, CreditCard, Gift } from 'lucide-react';
 
-interface ContributeDialogProps {
-    gift: GiftWithContributions;
+interface FreeDonationDialogProps {
     open: boolean;
     onOpenChange: (open: boolean) => void;
+
+    minAmount?: number;
+    paypalMeUrl?: string;
+
+    title?: string;
+    description?: string;
+
+    /**
+     * Optionnel : callback si tu veux enregistrer le don quelque part
+     * (table "donations", webhook, etc.)
+     */
+    onRecordDonation?: (payload: { name: string; amount: number }) => Promise<void>;
 }
 
-export function ContributeDialog({ gift, open, onOpenChange }: ContributeDialogProps) {
+export function FreeDonationDialog({
+    open,
+    onOpenChange,
+    minAmount = 1,
+    paypalMeUrl = 'https://paypal.me/listenaissancemenguy',
+    title = 'Faire un don libre',
+    description = 'Choisissez le montant que vous souhaitez offrir 💛',
+    onRecordDonation,
+}: FreeDonationDialogProps) {
     const [name, setName] = useState('');
     const [amount, setAmount] = useState('');
     const [isProcessing, setIsProcessing] = useState(false);
     const { toast } = useToast();
-    const addContribution = useAddContribution();
-    const [showAmount, setShowAmount] = useState(true);
-
-    const remainingAmount = gift.target_amount
-        ? Math.max(gift.target_amount - gift.total_contributed, 0)
-        : null;
-
-    const minAmount = gift.min_contribution || 1;
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-
-        const contributionAmount = parseFloat(amount);
+        const donationAmount = parseFloat(amount);
 
         if (!name.trim()) {
             toast({
@@ -49,7 +56,7 @@ export function ContributeDialog({ gift, open, onOpenChange }: ContributeDialogP
             return;
         }
 
-        if (isNaN(contributionAmount) || contributionAmount < minAmount) {
+        if (Number.isNaN(donationAmount) || donationAmount < minAmount) {
             toast({
                 title: 'Erreur',
                 description: `Le montant minimum est de ${minAmount.toFixed(2)} €`,
@@ -58,47 +65,27 @@ export function ContributeDialog({ gift, open, onOpenChange }: ContributeDialogP
             return;
         }
 
-        if (remainingAmount !== null && contributionAmount > remainingAmount) {
-            toast({
-                title: 'Erreur',
-                description: `Le montant maximum est de ${remainingAmount.toFixed(2)} €`,
-                variant: 'destructive',
-            });
-            return;
-        }
-
-        // ✅ PayPal redirect
         setIsProcessing(true);
         try {
-            const contributionAmount = parseFloat(amount);
-
-            // 1) ouvrir PayPal.me avec le montant
-            const paypalMe = 'https://paypal.me/listenaissancemenguy';
-            const url = `${paypalMe}/${contributionAmount.toFixed(2)}`;
-
+            // 1) Ouvrir PayPal.me avec le montant
+            const url = `${paypalMeUrl}/${donationAmount.toFixed(2)}`;
             window.open(url, '_blank', 'noopener,noreferrer');
 
-            // 2) puis enregistrer la contribution (au choix)
-            // Option A (direct) : on enregistre tout de suite (confiance)
-            await addContribution.mutateAsync({
-                gift_id: gift.id,
-                name: name.trim(),
-                amount: contributionAmount,
-                payment_provider: 'PayPal.Me',
-                payment_id: null,
-                show_amount: showAmount,
-            });
+            // 2) Optionnel : enregistrer quelque part (si tu as un endpoint/table donations)
+            if (onRecordDonation) {
+                await onRecordDonation({ name: name.trim(), amount: donationAmount });
+            }
 
             toast({
                 title: 'Merci ! 🎉',
-                description: 'Paiement ouvert sur PayPal. Contribution enregistrée.',
+                description: 'PayPal est ouvert dans un nouvel onglet.',
             });
 
             setName('');
             setAmount('');
             onOpenChange(false);
-        } catch (error: unknown) {
-            const message = error instanceof Error ? error.message : 'Une erreur est survenue';
+        } catch (err: unknown) {
+            const message = err instanceof Error ? err.message : 'Une erreur est survenue';
             toast({ title: 'Erreur', description: message, variant: 'destructive' });
         } finally {
             setIsProcessing(false);
@@ -113,10 +100,13 @@ export function ContributeDialog({ gift, open, onOpenChange }: ContributeDialogP
             <DialogContent className='sm:max-w-md'>
                 <DialogHeader>
                     <DialogTitle className='font-display flex items-center gap-2'>
-                        <Heart className='w-5 h-5 text-primary' />
-                        Participer à la cagnotte
+                        <Gift className='w-5 h-5 text-primary' />
+                        {title}
                     </DialogTitle>
-                    <DialogDescription>Contribuez pour « {gift.title} »</DialogDescription>
+                    <DialogDescription className='flex items-center gap-2'>
+                        <Heart className='w-4 h-4 text-primary' />
+                        {description}
+                    </DialogDescription>
                 </DialogHeader>
 
                 <form
@@ -124,9 +114,9 @@ export function ContributeDialog({ gift, open, onOpenChange }: ContributeDialogP
                     className='space-y-4'
                 >
                     <div className='space-y-2'>
-                        <Label htmlFor='name'>Votre nom</Label>
+                        <Label htmlFor='donor-name'>Votre nom</Label>
                         <Input
-                            id='name'
+                            id='donor-name'
                             placeholder='Ex: Marie Dupont'
                             value={name}
                             onChange={(e) => setName(e.target.value)}
@@ -136,57 +126,35 @@ export function ContributeDialog({ gift, open, onOpenChange }: ContributeDialogP
                     </div>
 
                     <div className='space-y-2'>
-                        <Label htmlFor='amount'>Montant (€)</Label>
+                        <Label htmlFor='donation-amount'>Montant (€)</Label>
                         <Input
-                            id='amount'
+                            id='donation-amount'
                             type='number'
+                            inputMode='decimal'
                             step='0.01'
                             min={minAmount}
-                            max={remainingAmount ?? undefined}
                             placeholder={`Min. ${minAmount.toFixed(2)} €`}
                             value={amount}
                             onChange={(e) => setAmount(e.target.value)}
                             required
                             disabled={isProcessing}
                         />
-                        {remainingAmount !== null && (
-                            <p className='text-xs text-muted-foreground'>
-                                Reste {remainingAmount.toFixed(2)} € à financer
-                            </p>
-                        )}
+                        <p className='text-xs text-muted-foreground'>
+                            Don libre : vous choisissez le montant.
+                        </p>
                     </div>
-                    <div className='flex items-center space-x-2'>
-                        <Checkbox
-                            id='showAmount'
-                            checked={showAmount}
-                            onCheckedChange={(v) => setShowAmount(v === true)}
-                            disabled={isProcessing}
-                        />
-                        <Label
-                            htmlFor='showAmount'
-                            className='text-sm'
-                        >
-                            Afficher le montant sur la liste
-                        </Label>
-                    </div>
-                    <p className='text-xs text-muted-foreground'>
-                        Si décoché, votre nom apparaîtra sans le montant.
-                    </p>
 
                     <div className='flex gap-2 flex-wrap'>
-                        {[10, 20, 50, 100].map((quickAmount) => (
+                        {[5, 10, 20, 50, 100].map((quick) => (
                             <Button
-                                key={quickAmount}
+                                key={quick}
                                 type='button'
                                 variant='outline'
                                 size='sm'
-                                onClick={() => setAmount(quickAmount.toString())}
-                                disabled={
-                                    isProcessing ||
-                                    (remainingAmount !== null && quickAmount > remainingAmount)
-                                }
+                                onClick={() => setAmount(String(quick))}
+                                disabled={isProcessing}
                             >
-                                {quickAmount} €
+                                {quick} €
                             </Button>
                         ))}
                     </div>

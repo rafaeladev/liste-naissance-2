@@ -54,14 +54,16 @@ export function Header() {
                                     </Button>
                                 </>
                             ) : (
-                                <Button
-                                    variant='ghost'
-                                    size='sm'
-                                    onClick={() => setShowLogin(true)}
-                                >
-                                    <Lock className='w-4 h-4 mr-2' />
-                                    Admin
-                                </Button>
+                                <>
+                                    <Button
+                                        variant='ghost'
+                                        size='sm'
+                                        onClick={() => setShowLogin(true)}
+                                    >
+                                        <Lock className='w-4 h-4 mr-2' />
+                                        Admin
+                                    </Button>
+                                </>
                             )}
                         </div>
                     </div>

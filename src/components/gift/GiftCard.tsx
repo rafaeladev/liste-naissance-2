@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Gift, ExternalLink, Users, Check, Lock } from 'lucide-react';
+import { Gift, ExternalLink, Users, Check, Lock, Heart } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -177,7 +177,8 @@ export function GiftCard({ gift, onEdit, onDelete, isAdmin }: GiftCardProps) {
                                         variant='outline'
                                         className='text-xs'
                                     >
-                                        {c.name} • {Number(c.amount).toFixed(0)}€
+                                        {c.name}{' '}
+                                        {c.show_amount && `• ${Number(c.amount).toFixed(0)}€`}
                                     </Badge>
                                 ))}
                                 {gift.contributions.length > 5 && (
@@ -196,7 +197,9 @@ export function GiftCard({ gift, onEdit, onDelete, isAdmin }: GiftCardProps) {
                     {gift.reserved && gift.reserved_by && (
                         <div className='flex items-center justify-between gap-2 mb-3'>
                             <p className='text-sm text-muted-foreground'>
-                                Réservé par <span className='font-medium'>{gift.reserved_by}</span>
+                                Cadeau réservé par{' '}
+                                <span className='font-medium'>{gift.reserved_by}</span>
+                                <Heart className='w-3 h-3 text-destructive inline ml-1' />
                             </p>
 
                             {isAdmin && (
@@ -222,7 +225,7 @@ export function GiftCard({ gift, onEdit, onDelete, isAdmin }: GiftCardProps) {
                         {gift.is_shared && !isFullyFunded && (
                             <Button
                                 onClick={() => setShowContribute(true)}
-                                className='flex-1 gradient-primary text-primary-foreground'
+                                className='flex-1 gradient-primary text-primary-foreground hover:gradient-secondary transition-all'
                             >
                                 <Gift className='w-4 h-4 mr-2' />
                                 Participer

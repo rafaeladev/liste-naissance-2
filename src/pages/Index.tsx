@@ -2,8 +2,11 @@ import { AdminProvider } from '@/contexts/AdminContext';
 import { Header } from '@/components/layout/Header';
 import { GiftList } from '@/components/gift/GiftList';
 import { Heart, Users, Gift } from 'lucide-react';
-
+import { Button } from '@/components/ui/button';
+import { useState } from 'react';
+import { FreeDonationDialog } from '@/components/gift/FreeDonationDialog';
 const Index = () => {
+    const [showFreeDonation, setShowFreeDonation] = useState(false);
     return (
         <AdminProvider>
             <div className='min-h-screen bg-background relative'>
@@ -28,7 +31,7 @@ const Index = () => {
                                 <img
                                     src='/images/illus/canardpng.png'
                                     alt='Bébé Oliveira Menguy'
-                                    className='w-64 max-w-md rounded-2xl  object-cover'
+                                    className='w-48 sm:w-64 max-w-md rounded-2xl  object-cover animate-float-gentle'
                                 />
                             </div>
                             <h2 className='font-display text-3xl sm:text-4xl font-bold mb-4 animate-fade-in'>
@@ -66,22 +69,71 @@ const Index = () => {
                     <GiftList />
                 </main>
 
-                {/* Footer */}
-                <footer className='relative  min-h-[200px] overflow-hidden'>
+                <section className='relative overflow-hidden py-12 sm:py-16 h-[498px] '>
                     <img
-                        src='/images/illus/wave-haikei-3.svg'
+                        src='/images/illus/session-top.png'
                         alt='pattern background'
-                        className='absolute -bottom-20 left-0 w-full h-80 object-cover rotate-180 z-0 pointer-events-none'
+                        className='absolute -top-0 left-0 w-full h-[216px] object-cover z-0 pointer-events-none'
+                    />
+                    {/* <img
+                        src='/images/illus/session-bot.png'
+                        alt='pattern background'
+                        className='absolute -bottom-0 left-0 w-full h-[282px] object-cover z-0 pointer-events-none'
+                    /> */}
+                    <div className=' w-full relative bg-accent2 padding-bottom-8 pt-24 pb-16'>
+                        <div className='container mx-auto px-4 relative '>
+                            <div className='text-center max-w-3xl mx-auto my-auto mt-4'>
+                                <div className='mb-6 flex justify-center'>
+                                    <img
+                                        src='/images/illus/group.png'
+                                        alt='Bébé Oliveira Menguy'
+                                        className='w-64 sm:w-80 lg:w-96 max-w-md object-cover'
+                                    />
+                                </div>
+                                <h2 className='font-display text-3xl sm:text-4xl font-bold mb-4 animate-fade-in'>
+                                    Merci de faire partie de cette aventure !
+                                </h2>
+                                <p className='text-lg text-muted-foreground mb-8 animate-fade-in'>
+                                    Votre soutien et votre amour signifient le monde pour nous. Si
+                                    vous voulez, vous pouvez aussi faire un don.
+                                </p>
+
+                                <div className='flex justify-center max-w-sm mx-auto animate-slide-up'>
+                                    <Button
+                                        onClick={() => setShowFreeDonation(true)}
+                                        className='flex-1 gradient-primary text-primary-foreground hover:scale-105 transition-transform'
+                                    >
+                                        <Gift className='w-4 h-4 mr-2' />
+                                        Faire un don
+                                    </Button>
+                                    <FreeDonationDialog
+                                        open={showFreeDonation}
+                                        onOpenChange={setShowFreeDonation}
+                                    />
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                {/* Footer */}
+                <footer className='relative min-h-[300px] overflow-hidden bg-accent2 flex items-center justify-center'>
+                    {/* background image */}
+                    <img
+                        src='/images/illus/session-top-2.png'
+                        alt='pattern background'
+                        className='absolute bottom-0 left-0 w-full h-[266px] object-cover z-0 pointer-events-none'
                     />
 
-                    <div className='container mx-auto px-4 text-center relative z-10 pt-32'>
-                        <p className='text-sm text-muted-foreground'>
-                            Fait avec <Heart className='w-3 h-3 inline text-destructive' /> par
-                            notre famille
+                    {/* centered content */}
+                    <div className='relative z-10 text-center px-4'>
+                        <p className='text-sm text-muted-foreground flex items-center justify-center gap-2 mt-32'>
+                            Fait avec <Heart className='w-3 h-3 text-destructive' /> par notre
+                            famille
                             <img
                                 src='/images/illus/soleil.png'
                                 alt='Bébé Oliveira Menguy'
-                                className='w-12 h-12 rounded-2xl inline-block ml-2 object-cover'
+                                className='w-12 h-12 rounded-2xl object-cover'
                             />
                         </p>
                     </div>

@@ -36,7 +36,7 @@ export function ReserveDialog({ gift, open, onOpenChange }: ReserveDialogProps) 
     const { toast } = useToast();
     const reserveGift = useReserveGift();
     const unreserveGift = useUnreserveGift();
-    const [paypalAmount, setPaypalAmount] = useState('');
+    const [paypalAmount, setPaypalAmount] = useState(gift.price.toString());
     const [step, setStep] = useState<'form' | 'confirm'>('form');
     const [pendingAmount, setPendingAmount] = useState<number | null>(null);
 
@@ -233,16 +233,8 @@ export function ReserveDialog({ gift, open, onOpenChange }: ReserveDialogProps) 
                         </div>
 
                         <div className='space-y-2'>
-                            <Label htmlFor='reserveAmount'>Montant à payer (€)</Label>
-                            <Input
-                                id='reserveAmount'
-                                type='number'
-                                step='0.01'
-                                min='1'
-                                value={paypalAmount}
-                                onChange={(e) => setPaypalAmount(e.target.value)}
-                                required
-                            />
+                            <Label htmlFor='reserveAmount'>Montant à payer : </Label>
+                            {gift.price} €
                         </div>
 
                         <Button
