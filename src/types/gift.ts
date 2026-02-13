@@ -1,3 +1,5 @@
+export type GiftCategory = 'décoration' | 'déplacements' | 'dodo' | 'jeux' | 'repas' | 'autres';
+
 export interface Gift {
     id: string;
     title: string;
@@ -10,6 +12,7 @@ export interface Gift {
     min_contribution: number | null;
     reserved: boolean;
     reserved_by: string | null;
+    category: GiftCategory; // ✅ ajouté
     created_at: string;
     updated_at: string;
 }

@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Gift, ExternalLink, Users, Check, Lock, Heart } from 'lucide-react';
+import { Gift, ExternalLink, Users, Check, Lock, Heart, Trash2 } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -10,6 +10,7 @@ import { ReserveDialog } from './ReserveDialog';
 import { ImageLightbox } from './ImageLightbox';
 import { cn } from '@/lib/utils';
 import { useUnreserveGift } from '@/hooks/useGifts';
+import { useDeleteContribution } from '@/hooks/useGifts';
 
 interface GiftCardProps {
     gift: GiftWithContributions;
@@ -23,7 +24,7 @@ export function GiftCard({ gift, onEdit, onDelete, isAdmin }: GiftCardProps) {
     const [showReserve, setShowReserve] = useState(false);
     const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
     const unreserveGift = useUnreserveGift();
-
+    const deleteContribution = useDeleteContribution();
     const progressPercent =
         gift.is_shared && gift.target_amount
             ? Math.min((gift.total_contributed / gift.target_amount) * 100, 100)
@@ -79,6 +80,15 @@ export function GiftCard({ gift, onEdit, onDelete, isAdmin }: GiftCardProps) {
                         )}
                         {/* Status badges */}
                         <div className='absolute top-2 left-2 flex flex-col gap-1'>
+                            {gift.category && (
+                                <Badge
+                                    variant='secondary'
+                                    className='bg-card/80 text-foreground shadow-sm capitalize'
+                                >
+                                    {gift.category}
+                                </Badge>
+                            )}
+
                             {gift.is_shared && (
                                 <Badge
                                     variant='secondary'
@@ -164,23 +174,40 @@ export function GiftCard({ gift, onEdit, onDelete, isAdmin }: GiftCardProps) {
                     )}
 
                     {/* Contributors List */}
+                    {/* Contributors List */}
                     {gift.is_shared && gift.contributions.length > 0 && (
                         <div className='mb-4 p-3 bg-muted/50 rounded-lg'>
                             <p className='text-xs font-medium text-muted-foreground mb-2'>
                                 {gift.contributions.length} contributeur
                                 {gift.contributions.length > 1 ? 's' : ''}
                             </p>
-                            <div className='flex flex-wrap gap-1'>
+
+                            <div className='flex flex-wrap gap-2'>
                                 {gift.contributions.slice(0, 5).map((c) => (
-                                    <Badge
+                                    <div
                                         key={c.id}
-                                        variant='outline'
-                                        className='text-xs'
+                                        className='flex items-center gap-1'
                                     >
-                                        {c.name}{' '}
-                                        {c.show_amount && `• ${Number(c.amount).toFixed(0)}€`}
-                                    </Badge>
+                                        <Badge
+                                            variant='outline'
+                                            className='text-xs'
+                                        >
+                                            {c.name}{' '}
+                                            {c.show_amount && `• ${Number(c.amount).toFixed(0)}€`}
+                                        </Badge>
+
+                                        {isAdmin && (
+                                            <button
+                                                type='button'
+                                                onClick={() => deleteContribution.mutate(c.id)}
+                                                className='text-destructive hover:scale-110 transition text-xs'
+                                            >
+                                                <Trash2 className='w-3 h-3 text-destructive cursor-pointer hover:scale-110 transition' />
+                                            </button>
+                                        )}
+                                    </div>
                                 ))}
+
                                 {gift.contributions.length > 5 && (
                                     <Badge
                                         variant='outline'
@@ -225,7 +252,7 @@ export function GiftCard({ gift, onEdit, onDelete, isAdmin }: GiftCardProps) {
                         {gift.is_shared && !isFullyFunded && (
                             <Button
                                 onClick={() => setShowContribute(true)}
-                                className='flex-1 gradient-primary text-primary-foreground hover:gradient-secondary transition-all'
+                                className='flex-1 gradient-primary-smooth text-primary-foreground  transition-all duration-500 ease-in-out'
                             >
                                 <Gift className='w-4 h-4 mr-2' />
                                 Participer
@@ -234,7 +261,7 @@ export function GiftCard({ gift, onEdit, onDelete, isAdmin }: GiftCardProps) {
                         {!gift.is_shared && !gift.reserved && (
                             <Button
                                 onClick={() => setShowReserve(true)}
-                                className='flex-1'
+                                className='flex-1 gradient-primary-smooth text-primary-foreground  transition-all duration-500 ease-in-out'
                                 variant='default'
                             >
                                 <Gift className='w-4 h-4 mr-2' />

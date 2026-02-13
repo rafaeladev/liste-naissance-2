@@ -35,7 +35,7 @@ export function useGifts() {
             const { data: gifts, error: giftsError } = await supabase
                 .from('gifts')
                 .select('*')
-                .order('created_at', { ascending: false });
+                .order('created_at', { ascending: true });
 
             if (giftsError) throw giftsError;
 
@@ -126,6 +126,21 @@ export function useAddContribution() {
 
             if (error) throw error;
             return data;
+        },
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ['gifts'] });
+        },
+    });
+}
+
+export function useDeleteContribution() {
+    const queryClient = useQueryClient();
+
+    return useMutation({
+        mutationFn: async (id: string) => {
+            const { error } = await supabase.from('contributions').delete().eq('id', id);
+
+            if (error) throw error;
         },
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ['gifts'] });

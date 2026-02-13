@@ -3,8 +3,16 @@ import { useGifts, useDeleteGift } from '@/hooks/useGifts';
 import { useAdmin } from '@/contexts/AdminContext';
 import { GiftCard } from './GiftCard';
 import { GiftFormDialog } from './GiftFormDialog';
-import { GiftWithContributions } from '@/types/gift';
-import { Loader2, Package, Search } from 'lucide-react';
+import { Gift, GiftWithContributions } from '@/types/gift';
+import {
+    Loader2,
+    Package,
+    Search,
+    ChevronsRight,
+    ChevronsLeft,
+    ChevronLeft,
+    ChevronRight,
+} from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import {
     Select,
@@ -36,6 +44,13 @@ export function GiftList() {
     const [editingGift, setEditingGift] = useState<GiftWithContributions | null>(null);
     const [deletingGift, setDeletingGift] = useState<GiftWithContributions | null>(null);
 
+    const [currentPage, setCurrentPage] = useState(1);
+
+    // 5 cards on mobile, 9 on larger screens
+    const pageSize = window.innerWidth < 640 ? 5 : 9;
+
+    const [categoryFilter, setCategoryFilter] = useState<'all' | Gift['category']>('all');
+
     if (isLoading) {
         return (
             <div className='flex items-center justify-center py-20'>
@@ -55,16 +70,40 @@ export function GiftList() {
     const filteredGifts = gifts?.filter((gift) => {
         const matchesSearch = gift.title.toLowerCase().includes(searchQuery.toLowerCase());
 
+        const matchesCategory = categoryFilter === 'all' || gift.category === categoryFilter;
+
+        let matchesStatus = true;
+
         switch (filter) {
             case 'available':
-                return matchesSearch && !gift.reserved && !gift.is_shared;
+                matchesStatus = !gift.reserved && !gift.is_shared;
+                break;
             case 'shared':
-                return matchesSearch && gift.is_shared;
+                matchesStatus = gift.is_shared;
+                break;
             case 'reserved':
-                return matchesSearch && gift.reserved;
-            default:
-                return matchesSearch;
+                matchesStatus = gift.reserved;
+                break;
         }
+
+        return matchesSearch && matchesStatus && matchesCategory;
+    });
+
+    // Fonction pour verifier si un cagnotte a été complétée
+    const isSharedCompleted = (gift: GiftWithContributions) => {
+        if (!gift.is_shared) return false;
+        const total = gift.contributions?.reduce((sum, c) => sum + (c.amount ?? 0), 0) ?? 0;
+        const target = gift.price ?? 0;
+        return target > 0 && total >= target;
+    };
+
+    // Tri de la liste filtrée : les cagnottes complétées en dernier
+    const sortedGifts = (filteredGifts ?? []).slice().sort((a, b) => {
+        const aToEnd = a.reserved || isSharedCompleted(a);
+        const bToEnd = b.reserved || isSharedCompleted(b);
+
+        // false (0) en premier, true (1) à la fin
+        return Number(aToEnd) - Number(bToEnd);
     });
 
     const handleDelete = async () => {
@@ -87,6 +126,28 @@ export function GiftList() {
         }
     };
 
+    // Calcul des cadeaux à afficher pour la page courante
+    const totalItems = filteredGifts?.length ?? 0;
+
+    const totalPages = Math.max(1, Math.ceil(totalItems / pageSize));
+
+    const startIndex = (currentPage - 1) * pageSize;
+    const paginatedGifts = sortedGifts.slice(startIndex, startIndex + pageSize);
+
+    const getPageNumbers = () => {
+        const delta = 2; // nombre de pages autour de la page courante
+        const pages = [];
+
+        const start = Math.max(1, currentPage - delta);
+        const end = Math.min(totalPages, currentPage + delta);
+
+        for (let i = start; i <= end; i++) {
+            pages.push(i);
+        }
+
+        return pages;
+    };
+
     return (
         <div className='space-y-6'>
             {/* Search & Filter */}
@@ -96,13 +157,19 @@ export function GiftList() {
                     <Input
                         placeholder='Rechercher un cadeau...'
                         value={searchQuery}
-                        onChange={(e) => setSearchQuery(e.target.value)}
+                        onChange={(e) => {
+                            setSearchQuery(e.target.value);
+                            setCurrentPage(1);
+                        }}
                         className='pl-10'
                     />
                 </div>
                 <Select
                     value={filter}
-                    onValueChange={(v) => setFilter(v as typeof filter)}
+                    onValueChange={(v) => {
+                        setFilter(v as typeof filter);
+                        setCurrentPage(1);
+                    }}
                 >
                     <SelectTrigger className='w-full sm:w-48'>
                         <SelectValue placeholder='Filtrer' />
@@ -114,12 +181,47 @@ export function GiftList() {
                         <SelectItem value='reserved'>Réservés</SelectItem>
                     </SelectContent>
                 </Select>
+
+                <Select
+                    value={categoryFilter}
+                    onValueChange={(v) => {
+                        setCategoryFilter(v as typeof categoryFilter);
+                        setCurrentPage(1);
+                    }}
+                >
+                    <SelectTrigger className='w-full sm:w-48'>
+                        <SelectValue placeholder='Catégorie' />
+                    </SelectTrigger>
+                    <SelectContent>
+                        <SelectItem value='all'>Toutes les catégories</SelectItem>
+                        <SelectItem
+                            value='décoration'
+                            className='capitalize'
+                        >
+                            Décoration
+                        </SelectItem>
+                        <SelectItem value='déplacements'>Déplacements</SelectItem>
+                        <SelectItem value='dodo'>Dodo</SelectItem>
+                        <SelectItem value='jeux'>Jeux</SelectItem>
+                        <SelectItem value='repas'>Repas</SelectItem>
+                        <SelectItem value='autres'>Autres</SelectItem>
+                    </SelectContent>
+                </Select>
             </div>
 
             {/* Grid */}
-            {filteredGifts && filteredGifts.length > 0 ? (
+            {sortedGifts.length > 0 ? (
                 <div className='grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6'>
-                    {filteredGifts.map((gift) => (
+                    {/* {filteredGifts.map((gift) => (
+                        <GiftCard
+                            key={gift.id}
+                            gift={gift}
+                            isAdmin={isAdmin}
+                            onEdit={() => setEditingGift(gift)}
+                            onDelete={() => setDeletingGift(gift)}
+                        />
+                    ))} */}
+                    {paginatedGifts.map((gift) => (
                         <GiftCard
                             key={gift.id}
                             gift={gift}
@@ -140,6 +242,61 @@ export function GiftList() {
                             ? "Essayez avec d'autres termes"
                             : 'La liste est vide pour le moment'}
                     </p>
+                </div>
+            )}
+
+            {totalPages > 1 && (
+                <div className='flex flex-wrap items-center justify-center gap-2 mt-6'>
+                    {/* Aller au début */}
+                    <button
+                        onClick={() => setCurrentPage(1)}
+                        disabled={currentPage === 1}
+                        className='px-3 py-2 border rounded-md text-sm disabled:opacity-50 hover:bg-muted transition-colors duration-250 ease-in'
+                    >
+                        <ChevronsLeft className='h-5 w-5' />
+                    </button>
+
+                    {/* Page précédente */}
+                    <button
+                        onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
+                        disabled={currentPage === 1}
+                        className='px-3 py-2 border rounded-md text-sm disabled:opacity-50 hover:bg-muted transition-colors duration-250 ease-in'
+                    >
+                        <ChevronLeft className='h-5 w-5' />
+                    </button>
+
+                    {/* Numéros de pages */}
+                    {getPageNumbers().map((page) => (
+                        <button
+                            key={page}
+                            onClick={() => setCurrentPage(page)}
+                            className={`px-3 py-2 rounded-md text-sm border ${
+                                page === currentPage
+                                    ? 'bg-primary text-primary-foreground'
+                                    : 'hover:bg-muted'
+                            } transition-colors duration-250 ease-in`}
+                        >
+                            {page}
+                        </button>
+                    ))}
+
+                    {/* Page suivante */}
+                    <button
+                        onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
+                        disabled={currentPage === totalPages}
+                        className='px-3 py-2 border rounded-md text-sm disabled:opacity-50 hover:bg-muted transition-colors duration-250 ease-in'
+                    >
+                        <ChevronRight className='h-5 w-5' />
+                    </button>
+
+                    {/* Aller à la fin */}
+                    <button
+                        onClick={() => setCurrentPage(totalPages)}
+                        disabled={currentPage === totalPages}
+                        className='px-3 py-2 border rounded-md text-sm disabled:opacity-50 hover:bg-muted transition-colors duration-250 ease-in'
+                    >
+                        <ChevronsRight className='h-5 w-5' />
+                    </button>
                 </div>
             )}
 

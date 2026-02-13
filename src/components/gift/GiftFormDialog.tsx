@@ -7,7 +7,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Switch } from '@/components/ui/switch';
 import { useToast } from '@/hooks/use-toast';
 import { useCreateGift, useUpdateGift } from '@/hooks/useGifts';
-import { GiftWithContributions } from '@/types/gift';
+import { Gift, GiftWithContributions } from '@/types/gift';
 import { Plus, X, Image as ImageIcon } from 'lucide-react';
 
 interface GiftFormDialogProps {
@@ -28,6 +28,9 @@ export function GiftFormDialog({ gift, open, onOpenChange }: GiftFormDialogProps
     const [minContribution, setMinContribution] = useState('');
     const [availableImages, setAvailableImages] = useState<string[]>([]);
     const [selectedImage, setSelectedImage] = useState<string>('');
+    const categories = ['décoration', 'déplacements', 'dodo', 'jeux', 'repas', 'autres'] as const;
+
+    const [category, setCategory] = useState<Gift['category']>(gift?.category ?? 'autres');
 
     const { toast } = useToast();
     const createGift = useCreateGift();
@@ -45,6 +48,7 @@ export function GiftFormDialog({ gift, open, onOpenChange }: GiftFormDialogProps
             setIsShared(gift.is_shared);
             setTargetAmount(gift.target_amount?.toString() || '');
             setMinContribution(gift.min_contribution?.toString() || '');
+            setCategory(gift.category ?? 'autres');
         } else {
             resetForm();
         }
@@ -60,6 +64,7 @@ export function GiftFormDialog({ gift, open, onOpenChange }: GiftFormDialogProps
         setIsShared(false);
         setTargetAmount('');
         setMinContribution('');
+        setCategory('autres');
     };
 
     const addImage = () => {
@@ -96,6 +101,7 @@ export function GiftFormDialog({ gift, open, onOpenChange }: GiftFormDialogProps
             min_contribution: isShared && minContribution ? parseFloat(minContribution) : null,
             reserved: gift?.reserved || false,
             reserved_by: gift?.reserved_by || null,
+            category: category,
         };
 
         try {
@@ -163,6 +169,27 @@ export function GiftFormDialog({ gift, open, onOpenChange }: GiftFormDialogProps
                             onChange={(e) => setTitle(e.target.value)}
                             required
                         />
+                    </div>
+
+                    {/* Category */}
+                    <div className='space-y-2'>
+                        <Label htmlFor='category'>Catégorie</Label>
+                        <select
+                            id='category'
+                            className='flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm'
+                            value={category}
+                            onChange={(e) => setCategory(e.target.value as Gift['category'])}
+                        >
+                            {categories.map((cat) => (
+                                <option
+                                    key={cat}
+                                    value={cat}
+                                    className='capitalize'
+                                >
+                                    {cat}
+                                </option>
+                            ))}
+                        </select>
                     </div>
 
                     {/* Price */}
