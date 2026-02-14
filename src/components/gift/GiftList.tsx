@@ -4,6 +4,7 @@ import { useAdmin } from '@/contexts/AdminContext';
 import { GiftCard } from './GiftCard';
 import { GiftFormDialog } from './GiftFormDialog';
 import { Gift, GiftWithContributions } from '@/types/gift';
+
 import {
     Loader2,
     Package,
@@ -12,6 +13,7 @@ import {
     ChevronsLeft,
     ChevronLeft,
     ChevronRight,
+    Heart,
 } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import {
@@ -32,6 +34,8 @@ import {
     AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
 import { useToast } from '@/hooks/use-toast';
+import { Button } from '../ui/button';
+import { FreeDonationDialog } from './FreeDonationDialog';
 
 export function GiftList() {
     const { data: gifts, isLoading, error } = useGifts();
@@ -45,6 +49,7 @@ export function GiftList() {
     const [deletingGift, setDeletingGift] = useState<GiftWithContributions | null>(null);
 
     const [currentPage, setCurrentPage] = useState(1);
+    const [showFreeDonation, setShowFreeDonation] = useState(false);
 
     // 5 cards on mobile, 9 on larger screens
     const pageSize = window.innerWidth < 640 ? 5 : 9;
@@ -244,6 +249,32 @@ export function GiftList() {
                     </p>
                 </div>
             )}
+
+            <section className='mx-auto max-w-full mt-10 '>
+                <div className='w-full flex flex-col justify-center items-center mx-auto animate-slide-up text-center gap-6 bg-gradient-to-b from-amber-50 to-amber-50/40 py-10 border border shadow-sm'>
+                    <Heart className='w-10 h-10 text-yellow-400 fill-yellow-400' />
+                    <h2 className='font-display text-3xl sm:text-4xl font-bold mb-4 animate-fade-in'>
+                        Faire un don libre
+                    </h2>
+                    <p className='text-lg max-w-2xl text-muted-foreground mb-8 animate-fade-in'>
+                        Si vous voulez, vous pouvez aussi faire un don libre pour nous aider à
+                        préparer l'arrivée de notre bébé et à couvrir les frais liés à la naissance.
+                    </p>
+
+                    <Button
+                        onClick={() => setShowFreeDonation(true)}
+                        className='mx-auto inline-flex w-lg max-w-sm items-center justify-center rounded-xl bg-amber-300 px-6 py-3 text-base font-semibold text-primary-foreground shadow-sm transition hover:bg-amber-400 focus:outline-none focus:ring-2 focus:ring-amber-400/60 focus:ring-offset-2'
+                    >
+                        {/* <Gift className='w-4 h-4 mr-2' /> */}
+                        Faire un don
+                    </Button>
+
+                    <FreeDonationDialog
+                        open={showFreeDonation}
+                        onOpenChange={setShowFreeDonation}
+                    />
+                </div>
+            </section>
 
             {totalPages > 1 && (
                 <div className='flex flex-wrap items-center justify-center gap-2 mt-6'>

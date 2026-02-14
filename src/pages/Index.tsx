@@ -86,7 +86,7 @@ const Index = () => {
                                         href='#cadeaux'
                                         className='flex flex-col items-center justify-center  gap-0'
                                     >
-                                        <Users className='w-6 h-6 mx-auto text-secondary-foreground mb-2' />
+                                        <Users className='w-6 h-6 mx-auto text-yellow-400 fill-yellow-400 mb-2' />
                                         <p className='font-display font-bold text-xl'>Cagnottes</p>
                                         <p className='text-xs text-muted-foreground'>partagées</p>
                                     </a>
@@ -101,7 +101,7 @@ const Index = () => {
                                         href='#merci'
                                         className='flex flex-col items-center justify-center  gap-0'
                                     >
-                                        <Heart className='w-6 h-6 mx-auto text-destructive mb-2' />
+                                        <Heart className='w-6 h-6 text-yellow-400 fill-yellow-400' />
                                         <p className='font-display font-bold text-xl'>Merci</p>
                                         <p className='text-xs text-muted-foreground'>pour tout !</p>
                                     </a>
@@ -147,28 +147,12 @@ const Index = () => {
                                 </div>
 
                                 <h2 className='font-display text-3xl sm:text-4xl font-bold mb-4 animate-fade-in'>
-                                    Merci de faire partie de cette aventure !
+                                    <AnimatedText text='Merci de faire partie de cette aventure !' />
                                 </h2>
 
-                                <p className='text-lg text-muted-foreground mb-8 animate-fade-in'>
-                                    Votre soutien et votre amour signifient le monde pour nous. Si
-                                    vous voulez, vous pouvez aussi faire un don.
-                                </p>
-
-                                <div className='flex justify-center max-w-sm mx-auto animate-slide-up'>
-                                    <Button
-                                        onClick={() => setShowFreeDonation(true)}
-                                        className='flex-1 gradient-primary text-primary-foreground hover:scale-105 transition-transform'
-                                    >
-                                        <Gift className='w-4 h-4 mr-2' />
-                                        Faire un don
-                                    </Button>
-
-                                    <FreeDonationDialog
-                                        open={showFreeDonation}
-                                        onOpenChange={setShowFreeDonation}
-                                    />
-                                </div>
+                                {/* <p className='text-lg text-muted-foreground  animate-fade-in'>
+                                    Votre soutien et votre amour signifient le monde pour nous.
+                                </p> */}
                             </div>
                         </div>
                     </div>
@@ -201,8 +185,8 @@ const Index = () => {
                     {/* contenu (on pousse vers le bas pour ne pas passer sous la vague) */}
                     <div className='relative z-10 text-center '>
                         <p className='text-sm text-muted-foreground flex items-center justify-center gap-2 bg-primary w-100 p-4'>
-                            Fait avec <Heart className='w-3 h-3 text-destructive' /> par notre
-                            famille
+                            Fait avec <Heart className='w-3 h-3 text-tertiary fill-tertiary' /> par
+                            notre famille
                             <img
                                 src='/images/illus/soleil.png'
                                 alt='Bébé Oliveira Menguy'

@@ -30,6 +30,8 @@ export function GiftCard({ gift, onEdit, onDelete, isAdmin }: GiftCardProps) {
             ? Math.min((gift.total_contributed / gift.target_amount) * 100, 100)
             : 0;
 
+    console.log(progressPercent);
+
     const remainingAmount =
         gift.is_shared && gift.target_amount
             ? Math.max(gift.target_amount - gift.total_contributed, 0)
