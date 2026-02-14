@@ -121,6 +121,10 @@ export default {
                     '0%, 100%': { transform: 'translateY(0px)' },
                     '50%': { transform: 'translateY(-6px)' },
                 },
+                'letter-in': {
+                    '0%': { opacity: '0', transform: 'translateY(12px)', filter: 'blur(6px)' },
+                    '100%': { opacity: '1', transform: 'translateY(0)', filter: 'blur(0)' },
+                },
             },
 
             animation: {
@@ -129,9 +133,8 @@ export default {
                 'fade-in': 'fade-in 0.4s ease-out',
                 'scale-in': 'scale-in 0.3s ease-out',
                 'slide-up': 'slide-up 0.5s ease-out',
-
-                // 🦆 ✅ FIX: même nom + durée lente + easing
                 'float-gentle': 'float-gentle 1s ease-in-out infinite',
+                'letter-in': 'letter-in 650ms ease-out forwards',
             },
         },
     },

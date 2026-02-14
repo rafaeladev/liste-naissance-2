@@ -4,8 +4,6 @@ import { Gift, Contribution, GiftWithContributions } from '@/types/gift';
 import { useEffect } from 'react';
 
 export function useGifts() {
-    console.log('✅ useGifts loaded');
-
     const queryClient = useQueryClient();
 
     // Real-time subscription

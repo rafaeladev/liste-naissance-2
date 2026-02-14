@@ -5,14 +5,10 @@ import type { Database } from './types';
 const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL;
 const SUPABASE_ANON_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY;
 
-console.log('SUPABASE_URL =', SUPABASE_URL);
-console.log('SUPABASE_ANON_KEY defined? =', Boolean(SUPABASE_ANON_KEY));
-console.log('SUPABASE_ANON_KEY starts =', SUPABASE_ANON_KEY?.slice(0, 8));
-
 // Import the supabase client like this:
 // import { supabase } from "@/integrations/supabase/client";
 
-console.log('✅ USING supabase client file:', import.meta.url);
+// console.log('✅ USING supabase client file:', import.meta.url);
 
 export const supabase = createClient<Database>(SUPABASE_URL, SUPABASE_ANON_KEY, {
     auth: {

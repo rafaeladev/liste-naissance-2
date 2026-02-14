@@ -5,6 +5,7 @@ import { Heart, Users, Gift, ArrowUp } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useEffect, useState } from 'react';
 import { FreeDonationDialog } from '@/components/gift/FreeDonationDialog';
+import AnimatedText from '@/components/AnimatedText';
 const Index = () => {
     const [showFreeDonation, setShowFreeDonation] = useState(false);
     const [showScrollTop, setShowScrollTop] = useState(false);
@@ -52,9 +53,9 @@ const Index = () => {
                                 />
                             </div>
                             <h2 className='font-display text-3xl sm:text-4xl font-bold mb-4 animate-fade-in'>
-                                Liste de naissance Oliveira Menguy
+                                <AnimatedText text='Liste de naissance Oliveira Menguy' />
                             </h2>
-                            <p className='text-lg text-muted-foreground mb-8 animate-fade-in'>
+                            <p className='text-lg text-muted-foreground mb-8 animate-slide-up '>
                                 Découvrez les cadeaux que nous aimerions recevoir. Vous pouvez
                                 réserver un cadeau ou participer à une cagnotte collective.
                             </p>
