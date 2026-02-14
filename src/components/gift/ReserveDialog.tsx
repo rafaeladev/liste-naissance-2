@@ -23,13 +23,19 @@ import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
 import { useReserveGift, useUnreserveGift } from '@/hooks/useGifts';
 import { GiftWithContributions } from '@/types/gift';
-import { Gift, Unlock } from 'lucide-react';
+import { Gift, Unlock, BadgeCheck } from 'lucide-react';
+import { Textarea } from '../ui/textarea';
+import { supabase } from '@/integrations/supabase/client';
 
 interface ReserveDialogProps {
     gift: GiftWithContributions;
     open: boolean;
     onOpenChange: (open: boolean) => void;
 }
+
+type SendReservationEmailResponse =
+    | { ok: true }
+    | { ok: false; resendStatus?: number; error: string };
 
 export function ReserveDialog({ gift, open, onOpenChange }: ReserveDialogProps) {
     const [name, setName] = useState('');
@@ -39,6 +45,10 @@ export function ReserveDialog({ gift, open, onOpenChange }: ReserveDialogProps) 
     const [paypalAmount, setPaypalAmount] = useState(gift.price.toString());
     const [step, setStep] = useState<'form' | 'confirm'>('form');
     const [pendingAmount, setPendingAmount] = useState<number | null>(null);
+    const amountToSend = pendingAmount ?? Number(paypalAmount);
+
+    const [message, setMessage] = useState('');
+    const [email, setEmail] = useState('');
 
     const handleOpenPaypal = (e: React.FormEvent) => {
         e.preventDefault();
@@ -74,12 +84,38 @@ export function ReserveDialog({ gift, open, onOpenChange }: ReserveDialogProps) 
     const handleConfirmPaid = async () => {
         try {
             await reserveGift.mutateAsync({ id: gift.id, reservedBy: name.trim() });
+            // ✅ Envoi mail (best-effort)
+
+            const { data, error } = await supabase.functions.invoke<SendReservationEmailResponse>(
+                'send-reservation-email',
+                {
+                    body: {
+                        giftTitle: gift.title,
+                        reservedBy: name.trim(),
+                        amount: amountToSend,
+                        payerEmail: email.trim() || null,
+                        message: message.trim() || null,
+                    },
+                },
+            );
+
+            if (error) {
+                console.error('Edge function returned error:', error);
+                toast({
+                    title: 'Mail non envoyé',
+                    description: data?.ok === false ? data.error : error.message,
+                    variant: 'destructive',
+                });
+                return;
+            }
             toast({ title: 'Cadeau réservé 🎁', description: `Merci ${name} !` });
             setName('');
             setPaypalAmount('');
             setPendingAmount(null);
             setStep('form');
             onOpenChange(false);
+            setEmail('');
+            setMessage('');
         } catch {
             toast({
                 title: 'Erreur',
@@ -92,51 +128,6 @@ export function ReserveDialog({ gift, open, onOpenChange }: ReserveDialogProps) 
     const handleCancel = () => {
         setPendingAmount(null);
         setStep('form');
-    };
-
-    const handleReserveAndPay = async (e: React.FormEvent) => {
-        e.preventDefault();
-
-        if (!name.trim()) {
-            toast({
-                title: 'Erreur',
-                description: 'Veuillez entrer votre nom',
-                variant: 'destructive',
-            });
-            return;
-        }
-
-        const amountNumber = parseFloat(paypalAmount);
-        if (isNaN(amountNumber) || amountNumber <= 0) {
-            toast({
-                title: 'Erreur',
-                description: 'Veuillez entrer un montant valide',
-                variant: 'destructive',
-            });
-            return;
-        }
-
-        try {
-            // 1) Ouvrir PayPal.me
-            const paypalMe = 'https://www.paypal.me/listenaissancemenguy';
-            const url = `${paypalMe}/${amountNumber.toFixed(2)}`;
-            window.open(url, '_blank', 'noopener,noreferrer');
-
-            // 2) Réserver le cadeau dans Supabase
-            await reserveGift.mutateAsync({ id: gift.id, reservedBy: name.trim() });
-
-            toast({ title: 'Cadeau réservé 🎁', description: `PayPal ouvert. Merci ${name} !` });
-
-            setName('');
-            setPaypalAmount('');
-            onOpenChange(false);
-        } catch (error) {
-            toast({
-                title: 'Erreur',
-                description: 'Une erreur est survenue',
-                variant: 'destructive',
-            });
-        }
     };
 
     const handleUnreserve = async () => {
@@ -233,6 +224,28 @@ export function ReserveDialog({ gift, open, onOpenChange }: ReserveDialogProps) 
                         </div>
 
                         <div className='space-y-2'>
+                            <Label htmlFor='reserveEmail'>Votre email (optionnel)</Label>
+                            <Input
+                                id='reserveEmail'
+                                type='email'
+                                value={email}
+                                onChange={(e) => setEmail(e.target.value)}
+                                placeholder='ex: claire@email.com'
+                            />
+                        </div>
+
+                        <div className='space-y-2'>
+                            <Label htmlFor='reserveMessage'>Message (optionnel)</Label>
+                            <Textarea
+                                id='reserveMessage'
+                                value={message}
+                                onChange={(e) => setMessage(e.target.value)}
+                                placeholder='Un petit mot pour nous 💛'
+                                rows={3}
+                            />
+                        </div>
+
+                        <div className='space-y-2'>
                             <Label htmlFor='reserveAmount'>Montant à payer : </Label>
                             {gift.price} €
                         </div>
@@ -260,9 +273,9 @@ export function ReserveDialog({ gift, open, onOpenChange }: ReserveDialogProps) 
                         <Button
                             className='w-full'
                             onClick={handleConfirmPaid}
-                            disabled={reserveGift.isPending}
+                            disabled={reserveGift.isPending || pendingAmount == null}
                         >
-                            J’ai payé ✅
+                            J’ai payé <BadgeCheck />
                         </Button>
 
                         <Button
