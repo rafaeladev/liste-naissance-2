@@ -258,11 +258,11 @@ export function FreeDonationDialog({
                                 </button>
                             </div>
 
-                            <p className='text-xs text-muted-foreground'>
+                            {/* <p className='text-xs text-muted-foreground'>
                                 {paymentMethod === 'paypal'
                                     ? 'PayPal.me (carte possible selon PayPal)'
                                     : 'Vous verrez notre RIB et une référence à mettre.'}
-                            </p>
+                            </p> */}
                         </div>
 
                         <Button

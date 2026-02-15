@@ -283,16 +283,11 @@ export function ReserveDialog({ gift, open, onOpenChange }: ReserveDialogProps) 
                         </div>
 
                         <div className='space-y-2'>
-                            <Label htmlFor='reserveAmount'>Montant</Label>
-                            <Input
-                                id='reserveAmount'
-                                type='number'
-                                step='0.01'
-                                min='0'
-                                value={paypalAmount}
-                                onChange={(e) => setPaypalAmount(e.target.value)}
-                                required
-                            />
+                            <Label>Montant</Label>
+                            <div className='flex items-center justify-between p-3 '>
+                                {/* <span className='text-sm'>{gift.title}</span> */}
+                                <span className='font-semibold'>{paypalAmount} €</span>
+                            </div>
                         </div>
 
                         <div className='space-y-2'>
@@ -324,11 +319,11 @@ export function ReserveDialog({ gift, open, onOpenChange }: ReserveDialogProps) 
                                 </button>
                             </div>
 
-                            <p className='text-xs text-muted-foreground'>
+                            {/* <p className='text-xs text-muted-foreground'>
                                 {paymentMethod === 'paypal'
                                     ? 'PayPal.me (carte possible selon PayPal)'
                                     : 'Vous verrez notre RIB et une référence à mettre.'}
-                            </p>
+                            </p> */}
                         </div>
 
                         <Button

@@ -51,8 +51,8 @@ export function GiftList() {
     const [currentPage, setCurrentPage] = useState(1);
     const [showFreeDonation, setShowFreeDonation] = useState(false);
 
-    // 5 cards on mobile, 9 on larger screens
-    const pageSize = window.innerWidth < 640 ? 5 : 9;
+    // 6 cards on mobile, 12 on larger screens
+    const pageSize = window.innerWidth < 640 ? 6 : 12;
 
     const [categoryFilter, setCategoryFilter] = useState<'all' | Gift['category']>('all');
 
@@ -278,15 +278,16 @@ export function GiftList() {
 
             {totalPages > 1 && (
                 <div className='flex flex-wrap items-center justify-center gap-2 mt-6'>
-                    {/* Aller au début */}
-                    <button
-                        onClick={() => setCurrentPage(1)}
-                        disabled={currentPage === 1}
-                        className='px-3 py-2 border rounded-md text-sm disabled:opacity-50 hover:bg-muted transition-colors duration-250 ease-in'
-                    >
-                        <ChevronsLeft className='h-5 w-5' />
-                    </button>
-
+                    {/* Aller à la début */}
+                    {window.innerWidth < 640 && (
+                        <button
+                            onClick={() => setCurrentPage(1)}
+                            disabled={currentPage === 1}
+                            className='px-3 py-2 border rounded-md text-sm disabled:opacity-50 hover:bg-muted transition-colors duration-250 ease-in'
+                        >
+                            <ChevronsLeft className='h-5 w-5' />
+                        </button>
+                    )}
                     {/* Page précédente */}
                     <button
                         onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
@@ -321,13 +322,15 @@ export function GiftList() {
                     </button>
 
                     {/* Aller à la fin */}
-                    <button
-                        onClick={() => setCurrentPage(totalPages)}
-                        disabled={currentPage === totalPages}
-                        className='px-3 py-2 border rounded-md text-sm disabled:opacity-50 hover:bg-muted transition-colors duration-250 ease-in'
-                    >
-                        <ChevronsRight className='h-5 w-5' />
-                    </button>
+                    {window.innerWidth < 640 && (
+                        <button
+                            onClick={() => setCurrentPage(totalPages)}
+                            disabled={currentPage === totalPages}
+                            className='px-3 py-2 border rounded-md text-sm disabled:opacity-50 hover:bg-muted transition-colors duration-250 ease-in'
+                        >
+                            <ChevronsRight className='h-5 w-5' />
+                        </button>
+                    )}
                 </div>
             )}
 
