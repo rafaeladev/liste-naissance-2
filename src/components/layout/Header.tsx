@@ -25,11 +25,16 @@ export function Header() {
                                 />
                             </div>
                             <div>
-                                <h1 className='font-display text-xl font-bold'>Oliveira Menguy</h1>
-                                <p className='text-xs text-muted-foreground flex items-center gap-1'>
-                                    <Sparkles className='w-3 h-3' />
-                                    Bienvenue !
-                                </p>
+                                <a href='/'>
+                                    {' '}
+                                    <h1 className='font-display text-xl font-bold'>
+                                        Oliveira Menguy
+                                    </h1>
+                                    <p className='text-xs text-muted-foreground flex items-center gap-1'>
+                                        <Sparkles className='w-3 h-3' />
+                                        Bienvenue !
+                                    </p>
+                                </a>
                             </div>
                         </div>
 
