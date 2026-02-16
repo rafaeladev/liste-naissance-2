@@ -2,26 +2,30 @@ export default function AnimatedText({
     text,
     className = '',
     delayMs = 0,
-    staggerMs = 25,
+    staggerMs = 120, // plus lent car par mot
 }: {
     text: string;
     className?: string;
     delayMs?: number;
     staggerMs?: number;
 }) {
+    const words = text.split(' ');
+
     return (
         <span
             className={className}
             aria-label={text}
             role='text'
         >
-            {Array.from(text).map((char, i) => (
+            {words.map((word, i) => (
                 <span
-                    key={`${char}-${i}`}
+                    key={`${word}-${i}`}
                     className='inline-block animate-float-gentle will-change-transform'
                     style={{ animationDelay: `${delayMs + i * staggerMs}ms` }}
                 >
-                    {char === ' ' ? '\u00A0' : char}
+                    {word}
+                    {/* espace qui, lui, peut wrap */}
+                    {i < words.length - 1 ? '\u00A0' : ''}
                 </span>
             ))}
         </span>
