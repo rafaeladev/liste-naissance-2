@@ -51,8 +51,8 @@ export function GiftList() {
     const [currentPage, setCurrentPage] = useState(1);
     const [showFreeDonation, setShowFreeDonation] = useState(false);
 
-    // 6 cards on mobile, 12 on larger screens
-    const pageSize = window.innerWidth < 640 ? 6 : 12;
+    // 8 cards on mobile, 12 on larger screens
+    const pageSize = window.innerWidth < 640 ? 8 : 12;
 
     const [categoryFilter, setCategoryFilter] = useState<'all' | Gift['category']>('all');
 
